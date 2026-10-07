@@ -8,6 +8,8 @@
 
 M2 Big Data & IA — Données distribuées · Joseph KEITA
 
+Le projet a pour but de garantir que le service reste accessible en permanence, même si une machine tombe en panne. En répartissant le travail sur plusieurs serveurs, la défaillance de l'un d'eux n'a plus d'impact sur les utilisateurs. Cela réduit les risques de coupure et permet de faire évoluer ou réparer le système sans interrompre l'activité.
+
 Ce projet déploie un cluster Apache Cassandra de 3 nœuds avec Docker, l'alimente avec les données temps réel de l'API Vélib' de Paris, puis observe la réplication, les niveaux de cohérence et le comportement du cluster lors de la panne d'un nœud.
 
 ```text
