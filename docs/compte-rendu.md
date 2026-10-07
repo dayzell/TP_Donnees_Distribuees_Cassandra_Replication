@@ -143,10 +143,6 @@ docker stop cass3
 
 ![Résultats pendant la panne](media/image4.png)
 
-### Question 8
-
-> _À compléter_
-
 ---
 
 ## 9. Redémarrage du nœud
@@ -172,15 +168,11 @@ Son nouvel état est UN : il passe de DN à UN, avec le même Host ID et le mêm
 
 ![Lecture sur cass3 de la station écrite pendant la panne + lecture en ALL](media/verification_finale.png)
 
-### Question 10
-
-> _À compléter_
-
 ---
 
 ## 11. Synthèse
 
-> _À compléter : scénario 3 nœuds → RF = 3 → arrêt de cass3 → tests ONE / QUORUM / ALL → redémarrage → vérification_
+scénario 3 nœuds → RF = 3 → arrêt de cass3 → tests ONE / QUORUM / ALL → redémarrage → vérification_
 
 ### Question 11
 
