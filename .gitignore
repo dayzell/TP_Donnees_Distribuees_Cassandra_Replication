@@ -1,0 +1,12 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Fichiers temporaires Word
+~$*
+~WRL*.tmp
+
+# Énoncés fournis par l'enseignant
+TP3_Cluster_Cassandra_Replication_Pannes.md
+TP Guidé*.pdf
