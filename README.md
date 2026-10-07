@@ -1,5 +1,9 @@
 # TP Données Distribuées — Cluster Cassandra : réplication et tolérance aux pannes
 
+<p align="center">
+  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnE3cDhseWxrN3Y4b2RnYWppNGI1aTZ6ZjJsYzJiczk2NGd0Nm00aiZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/l36kU80xPf0ojG0Erg/giphy.gif" alt="Vélib" width="400">
+</p>
+
 *Cassandra à 3 nœuds : RF = 3, cohérence et panne d'un nœud*
 
 M2 Big Data & IA — Données distribuées · Joseph KEITA
