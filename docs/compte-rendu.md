@@ -59,7 +59,7 @@ Chaque niveau contient le niveau inférieur. Un cluster est composé de datacent
 
 **Que signifie RF = 3 pour une partition de la table métier ?**
 
-> _À compléter_
+> RF = 3 correspond à une réplication sur 3 nodes
 
 **Différence entre partitionnement et réplication :**
 
