@@ -15,9 +15,6 @@ Après le démarrage des trois nœuds :
 - **Combien de nœuds sont présents ?**
   > 3 nœuds sont présents
 
-- **Quel est leur état ?**
-  > _À compléter_
-
 - **Dans quel datacenter sont-ils placés ?**
   > Ils sont dans le datacenter : dc1
 
