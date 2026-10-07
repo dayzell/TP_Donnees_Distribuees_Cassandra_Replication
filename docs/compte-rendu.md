@@ -171,7 +171,9 @@ Son nouvel état est UN : il passe de DN à UN, avec le même Host ID et le mêm
 
 ## 10. Vérification de la réplication après redémarrage
 
-![Vérification finale des données](media/verification_finale.png)
+![Les 3 nœuds de nouveau en UN](media/verification_finale_status.png)
+
+![Lecture sur cass3 de la station écrite pendant la panne + lecture en ALL](media/verification_finale.png)
 
 ### Question 10
 

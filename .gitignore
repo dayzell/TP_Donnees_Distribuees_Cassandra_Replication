@@ -3,6 +3,9 @@ venv/
 __pycache__/
 *.pyc
 
+# Compte rendu Word (version de référence : docs/compte-rendu.md)
+*.docx
+
 # Fichiers temporaires Word
 ~$*
 ~WRL*.tmp
