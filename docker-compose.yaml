@@ -57,6 +57,20 @@ services:
     volumes:
       - cass3_data:/var/lib/cassandra
 
+  spark:
+    image: quay.io/jupyter/pyspark-notebook
+    container_name: spark-tp1
+    hostname: spark-tp1
+    networks:
+      - cass-net
+    ports:
+      - "8888:8888"
+      - "4040-4045:4040-4045"
+    environment:
+      JUPYTER_TOKEN: spark
+    volumes:
+      - ./notebook:/home/jovyan/work
+
 networks:
   cass-net:
     name: cass-net

@@ -3,6 +3,9 @@ venv/
 __pycache__/
 *.pyc
 
+# Jupyter
+.ipynb_checkpoints/
+
 # Compte rendu Word (version de référence : docs/compte-rendu.md)
 *.docx
 
@@ -10,6 +13,5 @@ __pycache__/
 ~$*
 ~WRL*.tmp
 
-# Énoncés fournis par l'enseignant
-TP3_Cluster_Cassandra_Replication_Pannes.md
-TP Guidé*.pdf
+# Énoncés et guides fournis par l'enseignant
+docs/enonces/
