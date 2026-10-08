@@ -1,6 +1,6 @@
 # Compte rendu — Données distribuées : de Cassandra à Spark
 
-*Cluster Cassandra à 3 nœuds (RF = 3, cohérence, panne d'un nœud), puis traitement des données Vélib' avec PySpark*
+*Cluster Cassandra à 3 nodes (RF = 3, cohérence, panne d'un node), puis traitement des données Vélib' avec PySpark*
 
 **Auteur :** Joseph KEITA — M2 Big Data & IA
 
@@ -15,23 +15,23 @@
 
 ## 1. Mise en place du cluster
 
-Les nœuds sont démarrés un par un (`docker compose up -d cass1`, puis `cass2`, puis `cass3`), en vérifiant l'état avec `nodetool status` entre chaque démarrage.
+Les nodes sont démarrés un par un (`docker compose up -d cass1`, puis `cass2`, puis `cass3`), en vérifiant l'état avec `nodetool status` entre chaque démarrage.
 
 ### Question 1
 
-- **Combien de nœuds sont présents ?**
-  > 3 nœuds sont présents.
+- **Combien de nodes sont présents ?**
+  > 3 nodes sont présents.
 
 - **Quel est leur état ?**
-  > Les trois nœuds sont **UN** (*Up / Normal*) : en ligne et intégrés à l'anneau.
+  > Les trois nodes sont **UN** (*Up / Normal*) : en ligne et intégrés à l'anneau.
 
 - **Dans quel datacenter sont-ils placés ?**
   > Ils sont dans le datacenter `dc1`.
 
 - **Dans quels racks sont-ils placés ?**
-  > Un nœud par rack : cass1 dans `rack1`, cass2 dans `rack2`, cass3 dans `rack3`.
+  > Un node par rack : cass1 dans `rack1`, cass2 dans `rack2`, cass3 dans `rack3`.
 
-![Cluster avec 3 nœuds](../screenshots/cassandra/cluster_3_noeuds.png)
+![Cluster avec 3 nodes](../screenshots/cassandra/cluster_3_noeuds.png)
 
 ---
 
@@ -43,14 +43,14 @@ Les nœuds sont démarrés un par un (`docker compose up -d cass1`, puis `cass2`
 
 ![Architecture du cluster](../screenshots/cassandra/architecture_cluster.png)
 
-Le cluster `tp2-cluster` contient un datacenter `dc1` de trois racks, avec un nœud par rack. Chaque nœud possède 16 tokens et `Owns (effective)` vaut 100 % pour chacun, car RF = 3 sur 3 nœuds.
+Le cluster `tp2-cluster` contient un datacenter `dc1` de trois racks, avec un node par rack. Chaque node possède 16 tokens et `Owns (effective)` vaut 100 % pour chacun, car RF = 3 sur 3 nodes.
 
 **Différence entre Cluster, Datacenter, Rack, Node :**
 
 Chaque niveau contient le niveau inférieur :
 
 - **Node** : une instance Cassandra (ici un conteneur) qui stocke une partie des données.
-- **Rack** : un groupe de nœuds qui partagent un même point de défaillance (baie, alimentation). Cassandra place les réplicas sur des racks différents.
+- **Rack** : un groupe de nodes qui partagent un même point de défaillance (baie, alimentation). Cassandra place les réplicas sur des racks différents.
 - **Datacenter** : un ensemble de racks (un site physique ou logique). Le facteur de réplication est défini par datacenter.
 - **Cluster** : l'ensemble des datacenters qui partagent le même anneau de tokens et le même nom.
 
@@ -81,12 +81,12 @@ WITH replication = {'class': 'NetworkTopologyStrategy', 'dc1': 3};
 
 **Que signifie RF = 3 pour une partition de la table métier ?**
 
-> RF = 3 correspond à une réplication sur 3 nodes : chaque partition, donc chaque station (`station_id`), est stockée en **3 exemplaires** sur 3 nœuds différents de `dc1`. Comme le cluster a exactement 3 nœuds, chaque nœud possède une copie de toutes les stations.
+> RF = 3 correspond à une réplication sur 3 nodes : chaque partition, donc chaque station (`station_id`), est stockée en **3 exemplaires** sur 3 nodes différents de `dc1`. Comme le cluster a exactement 3 nodes, chaque node possède une copie de toutes les stations.
 
 **Différence entre partitionnement et réplication :**
 
-- **Partitionnement :** répartir les données entre les nœuds. Chaque partition est envoyée sur le nœud qui possède son token. Cela permet de stocker et de traiter plus de données (scalabilité).
-- **Réplication :** copier chaque partition sur plusieurs nœuds (ici 3). Cela permet de continuer à servir les données si un nœud tombe (disponibilité, tolérance aux pannes).
+- **Partitionnement :** répartir les données entre les nodes. Chaque partition est envoyée sur le node qui possède son token. Cela permet de stocker et de traiter plus de données (scalabilité).
+- **Réplication :** copier chaque partition sur plusieurs nodes (ici 3). Cela permet de continuer à servir les données si un node tombe (disponibilité, tolérance aux pannes).
 
 ---
 
@@ -99,14 +99,14 @@ Chemin d'une donnée de la table métier :
 - **Partition key :** `station_id = '15047'`
 - **Hash :** Murmur3 appliqué à `'15047'`
 - **Token :** `-9181437804237570319`, une position sur l'anneau
-- **Nœud(s) responsable(s) :** le nœud qui possède la plage de tokens contenant cette valeur
-- **Réplicas :** avec RF = 3, une copie sur chaque nœud (cass1, cass2, cass3), vérifiable avec `nodetool getendpoints velib_cluster stations_velib 15047`
+- **Node(s) responsable(s) :** le node qui possède la plage de tokens contenant cette valeur
+- **Réplicas :** avec RF = 3, une copie sur chaque node (cass1, cass2, cass3), vérifiable avec `nodetool getendpoints velib_cluster stations_velib 15047`
 
 ---
 
 ## 6. Niveaux de cohérence
 
-Requêtes exécutées avec les 3 nœuds en ligne :
+Requêtes exécutées avec les 3 nodes en ligne :
 
 ```sql
 CONSISTENCY ONE;
@@ -129,19 +129,19 @@ Les trois lectures renvoient la station `15047` (Morillons - Dantzig).
 
 - Garantie : la réponse d'un seul réplica suffit. C'est le plus rapide, mais la donnée peut être ancienne.
 - Disponibilité : maximale.
-- En cas de panne : fonctionne tant qu'au moins 1 nœud est en ligne (jusqu'à 2 pannes tolérées).
+- En cas de panne : fonctionne tant qu'au moins 1 node est en ligne (jusqu'à 2 pannes tolérées).
 
 **QUORUM** (2 réplicas sur 3)
 
 - Garantie : la majorité des réplicas répond. Si les écritures sont aussi en QUORUM, la lecture renvoie la dernière valeur écrite.
 - Disponibilité : bon compromis entre cohérence et disponibilité.
-- En cas de panne : fonctionne avec 1 nœud en panne, échoue s'il y en a 2.
+- En cas de panne : fonctionne avec 1 node en panne, échoue s'il y en a 2.
 
 **ALL** (3 réplicas sur 3)
 
 - Garantie : tous les réplicas répondent. C'est la cohérence la plus forte.
 - Disponibilité : minimale.
-- En cas de panne : échoue dès qu'un seul nœud est en panne (`Unavailable`).
+- En cas de panne : échoue dès qu'un seul node est en panne (`Unavailable`).
 
 ---
 
@@ -158,8 +158,8 @@ docker stop cass3
 ### Question 7
 
 - cass3 passe en **DN** (*Down / Normal*) : il est indisponible, mais il fait toujours partie du cluster.
-- cass1 et cass2 restent **UN** : **2 nœuds sur 3 sont encore disponibles**.
-- Chaque nœud possède toujours 100 % des données (RF = 3), donc toutes les stations restent accessibles sur cass1 et cass2.
+- cass1 et cass2 restent **UN** : **2 nodes sur 3 sont encore disponibles**.
+- Chaque node possède toujours 100 % des données (RF = 3), donc toutes les stations restent accessibles sur cass1 et cass2.
 
 ---
 
@@ -192,7 +192,7 @@ L'écriture réussit, car 2 réplicas sur 3 suffisent.
 
 ---
 
-## 9. Redémarrage du nœud
+## 9. Redémarrage du node
 
 ```bash
 docker start cass3
@@ -211,7 +211,7 @@ Son nouvel état est **UN** : il passe de DN à UN, avec le même Host ID et le 
 
 ## 10. Vérification de la réplication après redémarrage
 
-![Les 3 nœuds de nouveau en UN](../screenshots/cassandra/verification_finale_status.png)
+![Les 3 nodes de nouveau en UN](../screenshots/cassandra/verification_finale_status.png)
 
 ![Lecture sur cass3 de la station écrite pendant la panne + lecture en ALL](../screenshots/cassandra/verification_finale.png)
 
@@ -220,7 +220,7 @@ Son nouvel état est **UN** : il passe de DN à UN, avec le même Host ID et le 
 - La station `99999`, écrite pendant que cass3 était arrêté, est lue **directement sur cass3** en `ONE`.
 - La lecture de `15047` en `ALL` fonctionne de nouveau : les 3 réplicas répondent.
 
-cass3 a récupéré l'écriture manquée grâce au **hinted handoff** : pendant la panne, le coordinateur a gardé un « hint » pour cass3, puis l'a rejoué au redémarrage du nœud.
+cass3 a récupéré l'écriture manquée grâce au **hinted handoff** : pendant la panne, le coordinateur a gardé un « hint » pour cass3, puis l'a rejoué au redémarrage du node.
 
 ```text
 Donnée (station 99999)
@@ -241,16 +241,16 @@ Retour de cass3 → le hint est rejoué, cass3 est à jour
 ## 11. Synthèse
 
 ```text
-3 nœuds → RF = 3 → arrêt de cass3 → tests ONE / QUORUM / ALL → redémarrage → vérification
+3 nodes → RF = 3 → arrêt de cass3 → tests ONE / QUORUM / ALL → redémarrage → vérification
 ```
 
-Le cluster démarre avec 3 nœuds et le keyspace `velib_cluster` en RF = 3 : chaque station est copiée sur les trois nœuds. À l'arrêt de cass3, il reste 2 nœuds et donc 2 réplicas de chaque station. Les lectures en ONE et QUORUM fonctionnent, celle en ALL échoue, et une écriture en QUORUM reste possible. Au redémarrage, cass3 revient en UN, récupère l'écriture manquée et la lecture en ALL fonctionne de nouveau.
+Le cluster démarre avec 3 nodes et le keyspace `velib_cluster` en RF = 3 : chaque station est copiée sur les trois nodes. À l'arrêt de cass3, il reste 2 nodes et donc 2 réplicas de chaque station. Les lectures en ONE et QUORUM fonctionnent, celle en ALL échoue, et une écriture en QUORUM reste possible. Au redémarrage, cass3 revient en UN, récupère l'écriture manquée et la lecture en ALL fonctionne de nouveau.
 
 ### Question 11
 
-**Pourquoi la réplication permet-elle à Cassandra de continuer à fonctionner lorsqu'un nœud tombe en panne ?**
+**Pourquoi la réplication permet-elle à Cassandra de continuer à fonctionner lorsqu'un node tombe en panne ?**
 
-Parce que chaque donnée existe sur plusieurs nœuds. Si un nœud tombe, les autres réplicas répondent à sa place. Tant que le nombre de réplicas disponibles reste suffisant pour le niveau de cohérence demandé (2 pour QUORUM), le cluster continue de lire et d'écrire. Le nœud en panne est ensuite resynchronisé à son retour (hinted handoff, et `nodetool repair` si besoin).
+Parce que chaque donnée existe sur plusieurs nodes. Si un node tombe, les autres réplicas répondent à sa place. Tant que le nombre de réplicas disponibles reste suffisant pour le niveau de cohérence demandé (2 pour QUORUM), le cluster continue de lire et d'écrire. Le node en panne est ensuite resynchronisé à son retour (hinted handoff, et `nodetool repair` si besoin).
 
 ---
 
@@ -281,7 +281,7 @@ La plage de ports 4040-4045 est publiée parce que chaque notebook ouvert crée 
 
 ## 2. Mise en réseau : le pont `cass-net`
 
-Au lancement, `spark-tp1` n'est relié qu'au réseau `bridge` par défaut de Docker. Il ne voit donc pas les nœuds Cassandra, qui sont sur le réseau `cass-net` créé par le `docker-compose.yaml`.
+Au lancement, `spark-tp1` n'est relié qu'au réseau `bridge` par défaut de Docker. Il ne voit donc pas les nodes Cassandra, qui sont sur le réseau `cass-net` créé par le `docker-compose.yaml`.
 
 On relie le conteneur Spark au réseau du cluster :
 
@@ -296,7 +296,7 @@ docker network inspect cass-net \
   --format '{{range .Containers}}{{.Name}} -> {{.IPv4Address}}{{"\n"}}{{end}}'
 ```
 
-![Spark et les 3 nœuds Cassandra sur cass-net](../screenshots/spark/reseau_cass_net.png)
+![Spark et les 3 nodes Cassandra sur cass-net](../screenshots/spark/reseau_cass_net.png)
 
 | Conteneur | Adresse sur `cass-net` |
 |---|---|
@@ -309,7 +309,7 @@ Sur un même réseau Docker, le **DNS interne de Docker** résout les noms de co
 
 Le cluster est vérifié avant de lancer Spark :
 
-![Les 3 nœuds Cassandra en UN avant la connexion de Spark](../screenshots/spark/nodetool_status_avant_spark.png)
+![Les 3 nodes Cassandra en UN avant la connexion de Spark](../screenshots/spark/nodetool_status_avant_spark.png)
 
 > Dans le `docker-compose.yaml` du dépôt, le service `spark` est déclaré directement sur `cass-net`. Avec `docker compose up -d spark`, l'étape `docker network connect` n'est plus nécessaire.
 
@@ -330,11 +330,11 @@ session.set_keyspace("velib_cluster")
 Le fonctionnement est le suivant :
 
 1. Le driver ouvre une connexion vers le **point de contact** `cass1` sur le port 9042.
-2. Il lit les tables système (`system.local`, `system.peers`) et **découvre tout l'anneau**. Une vérification depuis `spark-tp1` liste bien les 3 nœuds : `172.23.0.4` (rack1), `172.23.0.2` (rack2), `172.23.0.3` (rack3), tous `up`.
-3. Les requêtes sont ensuite réparties avec la politique `TokenAwarePolicy(DCAwareRoundRobinPolicy)` : chaque requête est envoyée de préférence à un nœud qui possède la partition demandée.
+2. Il lit les tables système (`system.local`, `system.peers`) et **découvre tout l'anneau**. Une vérification depuis `spark-tp1` liste bien les 3 nodes : `172.23.0.4` (rack1), `172.23.0.2` (rack2), `172.23.0.3` (rack3), tous `up`.
+3. Les requêtes sont ensuite réparties avec la politique `TokenAwarePolicy(DCAwareRoundRobinPolicy)` : chaque requête est envoyée de préférence à un node qui possède la partition demandée.
 4. Le niveau de cohérence par défaut du driver est **`LOCAL_ONE`** : une lecture depuis Spark réussit tant qu'un réplica de `dc1` répond. C'est le même mécanisme que dans la Partie I.
 
-Comme `spark-tp1` est sur `cass-net`, le driver peut joindre directement les trois nœuds. Depuis la machine hôte (script `import_velib.py`), seul cass1 est accessible, par le port 9042 publié.
+Comme `spark-tp1` est sur `cass-net`, le driver peut joindre directement les trois nodes. Depuis la machine hôte (script `import_velib.py`), seul cass1 est accessible, par le port 9042 publié.
 
 La connexion est validée en listant les keyspaces (`velib_cluster` apparaît) puis la structure de la table :
 
@@ -517,7 +517,7 @@ Lignes par partition (df2) : [11, 11]
 
 - Le DataFrame a **4 partitions**, car `createDataFrame` découpe la liste Python selon le parallélisme par défaut (`local[4]` = 4). Les 22 lignes sont réparties en 5, 5, 5 et 7.
 - `repartition(4)` garde 4 partitions, mais redistribue toutes les lignes (shuffle). `repartition(2)` change réellement leur nombre : 2 partitions de 11 lignes. Chaque partition sera traitée par une task.
-- Une **partition Spark** (une tranche du DataFrame, traitée par une task) n'est pas la même chose qu'une **partition Cassandra** (les lignes d'une même `station_id`, placées sur un nœud selon leur token).
+- Une **partition Spark** (une tranche du DataFrame, traitée par une task) n'est pas la même chose qu'une **partition Cassandra** (les lignes d'une même `station_id`, placées sur un node selon leur token).
 
 **Lazy Evaluation :**
 

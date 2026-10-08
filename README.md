@@ -4,16 +4,16 @@
   <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnE3cDhseWxrN3Y4b2RnYWppNGI1aTZ6ZjJsYzJiczk2NGd0Nm00aiZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/l36kU80xPf0ojG0Erg/giphy.gif" alt="Vélib" width="400">
 </p>
 
-*Cassandra à 3 nœuds (RF = 3, cohérence, panne d'un nœud), puis traitement des données avec PySpark*
+*Cassandra à 3 nodes (RF = 3, cohérence, panne d'un node), puis traitement des données avec PySpark*
 
 M2 Big Data & IA — Données distribuées · Joseph KEITA
 
 Le projet a pour but de garantir que le service reste accessible en permanence, même si une machine tombe en panne. En répartissant le travail sur plusieurs serveurs, la défaillance de l'un d'eux n'a plus d'impact sur les utilisateurs. Cela réduit les risques de coupure et permet de faire évoluer ou réparer le système sans interrompre l'activité.
 
-Ce projet déploie un cluster Apache Cassandra de 3 nœuds avec Docker et l'alimente avec les données temps réel de l'API Vélib' de Paris. Il observe la réplication, les niveaux de cohérence et la panne d'un nœud, puis connecte **Spark** au cluster pour traiter ces données dans un notebook PySpark.
+Ce projet déploie un cluster Apache Cassandra de 3 nodes avec Docker et l'alimente avec les données temps réel de l'API Vélib' de Paris. Il observe la réplication, les niveaux de cohérence et la panne d'un node, puis connecte **Spark** au cluster pour traiter ces données dans un notebook PySpark.
 
 ```text
-API Vélib' → import_velib.py → Cluster Cassandra (3 nœuds, RF = 3)
+API Vélib' → import_velib.py → Cluster Cassandra (3 nodes, RF = 3)
                                    │  cassandra-driver, réseau Docker cass-net
                                    ▼
                        Spark (Jupyter + PySpark) → DataFrame → transformations / agrégations → Spark UI
@@ -39,8 +39,8 @@ Réseau Docker : cass-net
 |---|---|
 | Image Cassandra | `cassandra:4.1` |
 | Snitch | `GossipingPropertyFileSnitch` |
-| Tokens par nœud | 16 |
-| Mémoire | 512 Mo de heap par nœud |
+| Tokens par node | 16 |
+| Mémoire | 512 Mo de heap par node |
 | Image Spark | `quay.io/jupyter/pyspark-notebook` (Spark 4.2.0) |
 | Mode Spark | `local[4]`, `spark.sql.shuffle.partitions = 4` |
 | Réseau Docker | `cass-net`, commun à Cassandra et Spark |
@@ -50,7 +50,7 @@ Réseau Docker : cass-net
 Spark et Cassandra tournent dans des conteneurs séparés. Ils communiquent parce qu'ils sont **sur le même réseau Docker `cass-net`** :
 
 1. **Réseau :** le conteneur `spark-tp1` est rattaché à `cass-net`, soit par `docker network connect cass-net spark-tp1`, soit directement par le `docker-compose.yaml`. Le DNS interne de Docker résout alors `cass1`, `cass2` et `cass3`.
-2. **Driver :** dans le notebook, `cassandra-driver` se connecte à `cass1` sur le port 9042 (protocole CQL natif) et découvre les deux autres nœuds. Le niveau de cohérence par défaut est `LOCAL_ONE`.
+2. **Driver :** dans le notebook, `cassandra-driver` se connecte à `cass1` sur le port 9042 (protocole CQL natif) et découvre les deux autres nodes. Le niveau de cohérence par défaut est `LOCAL_ONE`.
 3. **Lecture :** `SELECT * FROM stations_velib` est exécuté depuis le driver Spark, puis les lignes sont converties en liste Python.
 4. **DataFrame :** `spark.createDataFrame(data, columns)` répartit ces lignes en 4 partitions Spark.
 
@@ -84,14 +84,14 @@ CREATE TABLE velib_cluster.stations_velib (
 ```
 
 - **Partition key :** `station_id`, une station = une partition = une ligne.
-- **Réplication :** avec RF = 3 et 3 nœuds, chaque station est présente sur cass1, cass2 et cass3.
+- **Réplication :** avec RF = 3 et 3 nodes, chaque station est présente sur cass1, cass2 et cass3.
 
 ## Installation et lancement
 
 Prérequis : Docker et Python 3 (testé sous WSL avec Python 3.14).
 
 ```bash
-# 1. Démarrer les nœuds Cassandra un par un (attendre l'état UN entre chaque)
+# 1. Démarrer les nodes Cassandra un par un (attendre l'état UN entre chaque)
 docker compose up -d cass1
 docker compose up -d cass2
 docker compose up -d cass3
@@ -120,7 +120,7 @@ docker exec -it cass1 cqlsh -e "SELECT station_id, nom_station, vatiques_disponi
 # 6. Démarrer le conteneur Spark, déjà relié à cass-net
 docker compose up -d spark
 
-# 7. Vérifier que Spark et les 3 nœuds sont sur le même réseau
+# 7. Vérifier que Spark et les 3 nodes sont sur le même réseau
 docker network inspect cass-net \
   --format '{{range .Containers}}{{.Name}} -> {{.IPv4Address}}{{"\n"}}{{end}}'
 ```
@@ -162,7 +162,7 @@ docker exec -it cass3 cqlsh -e "USE velib_cluster; CONSISTENCY ONE; SELECT * FRO
 
 | Situation | ONE | QUORUM | ALL |
 |---|:---:|:---:|:---:|
-| 3 nœuds en ligne | ✅ | ✅ | ✅ |
+| 3 nodes en ligne | ✅ | ✅ | ✅ |
 | cass3 arrêté (2 réplicas sur 3) | ✅ | ✅ | ❌ `Unavailable` |
 | cass3 redémarré | ✅ | ✅ | ✅ |
 
