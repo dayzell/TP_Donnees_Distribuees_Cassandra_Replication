@@ -231,7 +231,3 @@ docker compose down -v     # arrête tout et supprime les volumes (données Cass
 <p align="center">
   <img src="docs/media/velib_spiderman.png" alt="Spark et Cassandra gardiens du réseau Vélib'" width="100%">
 </p>
-
-<p align="center">
-  <em>Spark et Cassandra en action : garantir la disponibilité de vos données, partout, tout le temps.</em>
-</p>
